@@ -22,11 +22,6 @@ import {
 /* ================================================================== */
 /* Flow state                                                         */
 /* ================================================================== */
-
-type Screen = 'splash' | 'login' | 'signup' | 'onboarding' | 'generating' | 'dashboard'
-
-const TOTAL_STEPS = 8
-
 type Answers = {
   gender: string
   goal: string
@@ -56,8 +51,6 @@ const emptyAnswers: Answers = {
   activity: '',
   budget: '300',
 }
-
-/* ================================================================== */
 /* Root — renders a phone frame around the active screen              */
 /* ================================================================== */
 
@@ -68,7 +61,6 @@ export default function App() {
     </LanguageProvider>
   )
 }
-
 type Theme = 'dark' | 'light'
 
 function AppInner() {
@@ -105,7 +97,7 @@ function AppInner() {
 
   return (
     <div
-      className="flex min-h-screen w-full items-center justify-center p-4 sm:p-8"
+      className="min-h-screen w-full flex items-center justify-center p-4 sm:p-8"
       style={{
         background:
           theme === 'light'
@@ -160,17 +152,11 @@ function AppInner() {
 function Phone({ children }: { children: React.ReactNode }) {
   const { dir } = useI18n()
   return (
-    <div dir={dir} className="relative h-[844px] w-[390px] max-w-full overflow-hidden rounded-[44px] border border-[var(--color-hair)] bg-[var(--color-ink)] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
-      {/* notch */}
-      <div className="pointer-events-none absolute left-1/2 top-2.5 z-30 h-7 w-32 -translate-x-1/2 rounded-full bg-black" />
-      {/* status bar */}
-      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-8 pt-4 text-[13px] font-semibold text-[var(--color-bone)]">
-        <span>9:41</span>
-        <span className="flex items-center gap-1.5 text-[var(--color-bone)]">
-          <span className="tracking-tight">●●●</span>
-          <span>􀙇</span>
-        </span>
-      </div>
+    <div
+      dir={dir}
+      className="relative h-[844px] w-[390px] max-w-full overflow-hidden bg-[var(--color-ink)] rounded-[28px] border border-[var(--color-hair)] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)] mx-auto"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
       <div className="h-full">{children}</div>
     </div>
   )
@@ -301,13 +287,14 @@ function AppleIcon() {
 }
 
 function OAuthRow() {
+  const { t } = useI18n()
   return (
     <div className="grid grid-cols-2 gap-3">
       <SecondaryButton className="!flex !items-center !justify-center !gap-2.5 !py-3">
-        <GoogleIcon /> Google
+        <GoogleIcon /> {t('google')}
       </SecondaryButton>
       <SecondaryButton className="!flex !items-center !justify-center !gap-2.5 !py-3">
-        <AppleIcon /> Apple
+        <AppleIcon /> {t('apple')}
       </SecondaryButton>
     </div>
   )
@@ -464,9 +451,9 @@ function Onboarding({
 
       {/* footer */}
       <div className="border-t border-[var(--color-hair)]/60 bg-[var(--color-ink)]/80 px-7 py-5 backdrop-blur">
-        <PrimaryButton onClick={onNext} disabled={!canContinue}>
-          {step === TOTAL_STEPS ? 'Build My Program' : 'Continue'}
-        </PrimaryButton>
+            <PrimaryButton onClick={onNext} disabled={!canContinue}>
+              {step === TOTAL_STEPS ? useI18n().t('buildProgram') : useI18n().t('continueBtn')}
+            </PrimaryButton>
       </div>
     </div>
   )
@@ -492,28 +479,28 @@ function StepContent({
   set: <K extends keyof Answers>(k: K, v: Answers[K]) => void
   toggle: (k: 'injuries', v: string) => void
 }) {
+  const { t } = useI18n()
+
   switch (step) {
     case 1:
       return (
         <>
-          <StepHeading eyebrow="About you" title="What's your gender?" />
-          <p className="mb-6 -mt-3 text-[13px] text-[var(--color-ash)]">
-            We tailor your training goals and program to how your body responds.
-          </p>
+          <StepHeading eyebrow={t('aboutYouEyebrow')} title={t('whatsYourGender')} />
+          <p className="mb-6 -mt-3 text-[13px] text-[var(--color-ash)]">{t('genderSub')}</p>
           <div className="grid grid-cols-2 gap-3">
             {[
-              ['Male', 'Build size, strength & power', '♂'],
-              ['Female', 'Sculpt, tone & shape', '♀'],
-            ].map(([t, s, i]) => (
+              ['Male', 'maleSub', '♂'],
+              ['Female', 'femaleSub', '♀'],
+            ].map(([key, subKey, i]) => (
               <button
-                key={t}
+                key={key}
                 onClick={() => {
-                  if (answers.gender !== t) set('goal', '')
-                  set('gender', t)
+                  if (answers.gender !== key) set('goal', '')
+                  set('gender', key)
                 }}
                 className={
                   'flex flex-col items-center gap-3 rounded-2xl border px-4 py-8 transition-all active:scale-[0.98] ' +
-                  (answers.gender === t
+                  (answers.gender === key
                     ? 'border-[var(--color-volt)] bg-[var(--color-volt)]/10'
                     : 'border-[var(--color-hair)] bg-[var(--color-surface)] hover:border-[var(--color-ash)]/60')
                 }
@@ -521,14 +508,14 @@ function StepContent({
                 <span
                   className={
                     'flex size-14 items-center justify-center rounded-full text-3xl transition-colors ' +
-                    (answers.gender === t ? 'bg-[var(--color-volt)] text-[var(--color-onaccent)]' : 'bg-[var(--color-surface-2)] text-[var(--color-bone)]')
+                    (answers.gender === key ? 'bg-[var(--color-volt)] text-[var(--color-onaccent)]' : 'bg-[var(--color-surface-2)] text-[var(--color-bone)]')
                   }
                 >
                   {i}
                 </span>
                 <span className="text-center">
-                  <span className="block font-display text-xl font-bold uppercase text-[var(--color-bone)]">{t}</span>
-                  <span className="mt-1 block text-[12px] leading-tight text-[var(--color-ash)]">{s}</span>
+                  <span className="block font-display text-xl font-bold uppercase text-[var(--color-bone)]">{t(key.toLowerCase())}</span>
+                  <span className="mt-1 block text-[12px] leading-tight text-[var(--color-ash)]">{t(subKey)}</span>
                 </span>
               </button>
             ))}
@@ -539,16 +526,16 @@ function StepContent({
       const goals =
         answers.gender === 'Female'
           ? [
-              ['Glutes & Curves', 'Build glutes, sculpt a snatched waist', '🍑'],
-              ['Tone & Sculpt', 'Firm, defined, athletic look', '✨'],
-              ['Fat Loss & Lean', 'Slim down & stay strong', '🔥'],
-              ['General Fitness', 'Feel healthy & energized', '⚡'],
+              [t('goal_glutes_title'), t('goal_glutes_sub'), '🍑'],
+              [t('goal_tone_title'), t('goal_tone_sub'), '✨'],
+              [t('goal_fatloss_title'), t('goal_fatloss_sub'), '🔥'],
+              [t('goal_general_title'), t('goal_general_sub'), '⚡'],
             ]
           : [
-              ['Build Muscle', 'Get bigger & more muscular', '💪'],
-              ['Get Stronger', 'Move heavier, raw power', '🏋️'],
-              ['Fat Loss & Lean', 'Cut fat, reveal definition', '🔥'],
-              ['Athletic Build', 'Balanced size & performance', '⚡'],
+              [t('goal_build_title'), t('goal_build_sub'), '💪'],
+              [t('goal_stronger_title'), t('goal_stronger_sub'), '🏋️'],
+              [t('goal_fatloss_title'), t('goal_fatloss_sub'), '🔥'],
+              [t('goal_athletic_title'), t('goal_athletic_sub'), '⚡'],
             ]
       return (
         <>
@@ -650,18 +637,18 @@ function StepContent({
     case 7:
       return (
         <>
-          <StepHeading eyebrow="Nutrition basics" title="A few body metrics" />
+          <StepHeading eyebrow={t('nutritionBasicsEyebrow')} title={t('bodyMetricsTitle')} />
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Height (cm)" inputMode="numeric" placeholder="178" value={answers.height} onChange={(e) => set('height', e.target.value)} />
-            <Input label="Weight (kg)" inputMode="numeric" placeholder="76" value={answers.weight} onChange={(e) => set('weight', e.target.value)} />
+            <Input label={t('heightCm')} inputMode="numeric" placeholder="178" value={answers.height} onChange={(e) => set('height', e.target.value)} />
+            <Input label={t('weightKg')} inputMode="numeric" placeholder="76" value={answers.weight} onChange={(e) => set('weight', e.target.value)} />
           </div>
           <div className="mt-3">
-            <Input label="Age" inputMode="numeric" placeholder="27" value={answers.age} onChange={(e) => set('age', e.target.value)} />
+            <Input label={t('age')} inputMode="numeric" placeholder="27" value={answers.age} onChange={(e) => set('age', e.target.value)} />
           </div>
-          <span className="mb-2 mt-5 block text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ash)]">Activity level</span>
+          <span className="mb-2 mt-5 block text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ash)]">{t('activityLevel')}</span>
           <div className="flex flex-col gap-2.5">
-            {['Mostly sedentary', 'Lightly active', 'Very active'].map((t) => (
-              <SelectCard key={t} title={t} selected={answers.activity === t} onClick={() => set('activity', t)} />
+            {[t('activity_mostly'), t('activity_lightly'), t('activity_very')].map((label) => (
+              <SelectCard key={label} title={label} selected={answers.activity === label} onClick={() => set('activity', label)} />
             ))}
           </div>
         </>
@@ -669,10 +656,10 @@ function StepContent({
     case 8:
       return (
         <>
-          <StepHeading eyebrow="Nutrition" title="Budget" />
+          <StepHeading eyebrow={t('budgetEyebrow')} title={t('budgetTitle')} />
           <div className="mt-6">
             <div className="mb-2 flex items-end justify-between">
-              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ash)]">Monthly food budget</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ash)]">{t('monthlyFoodBudget')}</span>
               <span className="font-display text-2xl font-extrabold text-[var(--color-volt)]">{answers.budget} {CURRENCY}</span>
             </div>
             <input
@@ -685,8 +672,8 @@ function StepContent({
               className="w-full accent-[var(--color-volt)]"
             />
             <div className="mt-1 flex justify-between text-[11px] text-[var(--color-ash)]">
-              <span>150 {CURRENCY}</span>
-              <span>600 {CURRENCY}</span>
+              <span>{t('monthlyMin')} {CURRENCY}</span>
+              <span>{t('monthlyMax')} {CURRENCY}</span>
             </div>
           </div>
         </>
@@ -700,10 +687,11 @@ function StepContent({
 /* 5 · Generating                                                     */
 /* ================================================================== */
 
-const PHASES = ['Analyzing your goals', 'Selecting your exercises', 'Calculating your nutrition targets', 'Assigning your starting rank']
+const PHASES = ['phase_analyzing', 'phase_selecting', 'phase_calculating', 'phase_assigning']
 
 function Generating({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState(0)
+  const { t } = useI18n()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -731,7 +719,12 @@ function Generating({ onDone }: { onDone: () => void }) {
       </div>
 
       <h2 className="relative mt-12 text-center font-display text-3xl font-bold uppercase leading-tight text-[var(--color-bone)]">
-        Building your<br />personalized program
+        {t('buildingProgramTitle').split('\n').map((line, i) => (
+          <span key={i}>
+            {line}
+            {i === 0 && <br />}
+          </span>
+        ))}
       </h2>
 
       <div key={phase} className="relative mt-5 flex items-center gap-2.5 text-sm text-[var(--color-ash)]" style={{ animation: 'rise 0.4s ease-out both' }}>
@@ -897,11 +890,11 @@ const ALL_EXERCISES: Exercise[] = Array.from(
 )
 
 // Shared option sets (also used by onboarding)
-const GOALS_MALE = ['Build Muscle', 'Get Stronger', 'Fat Loss & Lean', 'Athletic Build']
-const GOALS_FEMALE = ['Glutes & Curves', 'Tone & Sculpt', 'Fat Loss & Lean', 'General Fitness']
-const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
-const SESSIONS = ['30 min', '45 min', '60 min', '90+ min']
-const ACTIVITIES = ['Mostly sedentary', 'Lightly active', 'Very active']
+const GOALS_MALE = ['goal_build_title', 'goal_stronger_title', 'goal_fatloss_title', 'goal_athletic_title']
+const GOALS_FEMALE = ['goal_glutes_title', 'goal_tone_title', 'goal_fatloss_title', 'goal_general_title']
+const LEVELS = ['level_beginner', 'level_intermediate', 'level_advanced']
+const SESSIONS = ['session_30', 'session_45', 'session_60', 'session_90']
+const ACTIVITIES = ['activity_mostly', 'activity_lightly', 'activity_very']
 
 function exercisesFor(day: SplitDay): Exercise[] {
   const pool = poolFor(day)
@@ -1070,32 +1063,32 @@ function Settings({
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <h1 className="font-display text-2xl font-extrabold uppercase text-[var(--color-bone)]">Settings</h1>
+        <h1 className="font-display text-2xl font-extrabold uppercase text-[var(--color-bone)]">{useI18n().t('settings')}</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 pb-32 pt-1">
         {/* PERSONAL INFO */}
-        <SettingsSection title="Personal info">
+        <SettingsSection title={useI18n().t('personalInfo')}>
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Height (cm)" inputMode="numeric" value={draft.height} onChange={(e) => set('height', e.target.value)} />
-            <Input label="Weight (kg)" inputMode="numeric" value={draft.weight} onChange={(e) => set('weight', e.target.value)} />
+            <Input label={useI18n().t('heightCm')} inputMode="numeric" value={draft.height} onChange={(e) => set('height', e.target.value)} />
+            <Input label={useI18n().t('weightKg')} inputMode="numeric" value={draft.weight} onChange={(e) => set('weight', e.target.value)} />
           </div>
           <div className="mt-3">
-            <Input label="Age" inputMode="numeric" value={draft.age} onChange={(e) => set('age', e.target.value)} />
+            <Input label={useI18n().t('age')} inputMode="numeric" value={draft.age} onChange={(e) => set('age', e.target.value)} />
           </div>
-          <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ash)]">Activity level</p>
+          <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ash)]">{useI18n().t('activityLevel')}</p>
           <div className="flex flex-wrap gap-2">
             {ACTIVITIES.map((a) => (
-              <button key={a} onClick={() => set('activity', a)} className={pill(draft.activity === a)}>{a}</button>
+              <button key={a} onClick={() => set('activity', a)} className={pill(draft.activity === a)}>{useI18n().t(a)}</button>
             ))}
           </div>
-          <p className="mt-3 text-[12px] text-[var(--color-ash)]">Updating these recalculates your calorie &amp; macro targets.</p>
+          <p className="mt-3 text-[12px] text-[var(--color-ash)]">{useI18n().t('updatingRecalculates')}</p>
         </SettingsSection>
 
         {/* GOAL */}
-        <SettingsSection title="Objective">
+        <SettingsSection title={useI18n().t('objective')}>
           <div className="mb-3 flex gap-2">
-            {['Male', 'Female'].map((g) => (
+            {[useI18n().t('male'), useI18n().t('female')].map((g) => (
               <button
                 key={g}
                 onClick={() => {
@@ -1110,17 +1103,17 @@ function Settings({
           </div>
           <div className="flex flex-wrap gap-2">
             {goals.map((g) => (
-              <button key={g} onClick={() => set('goal', g)} className={pill(draft.goal === g)}>{g}</button>
+              <button key={g} onClick={() => set('goal', g)} className={pill(draft.goal === g)}>{useI18n().t(g)}</button>
             ))}
           </div>
         </SettingsSection>
 
         {/* TRAINING PLAN */}
-        <SettingsSection title="Training plan">
+        <SettingsSection title={useI18n().t('trainingPlan')}>
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ash)]">Experience level</p>
           <div className="flex flex-wrap gap-2">
             {LEVELS.map((l) => (
-              <button key={l} onClick={() => set('level', l)} className={pill(draft.level === l)}>{l}</button>
+              <button key={l} onClick={() => set('level', l)} className={pill(draft.level === l)}>{useI18n().t(l)}</button>
             ))}
           </div>
 
@@ -1140,15 +1133,15 @@ function Settings({
           <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ash)]">Session length</p>
           <div className="flex flex-wrap gap-2">
             {SESSIONS.map((s) => (
-              <button key={s} onClick={() => set('session', s)} className={pill(draft.session === s)}>{s}</button>
+              <button key={s} onClick={() => set('session', s)} className={pill(draft.session === s)}>{useI18n().t(s)}</button>
             ))}
           </div>
-          <p className="mt-3 text-[12px] text-[var(--color-ash)]">Changing your goal or days rebuilds your weekly split.</p>
+          <p className="mt-3 text-[12px] text-[var(--color-ash)]">{useI18n().t('splitRebuilds')}</p>
         </SettingsSection>
 
         {/* CUSTOMIZE EXERCISES */}
-        <SettingsSection title="Customize exercises">
-          <p className="-mt-1 mb-3 text-[12px] text-[var(--color-ash)]">Swap any exercise for an alternative that hits the same area.</p>
+        <SettingsSection title={useI18n().t('customizeExercises')}>
+          <p className="-mt-1 mb-3 text-[12px] text-[var(--color-ash)]">{useI18n().t('splitRebuilds')}</p>
           <div className="flex flex-col gap-2">
             {trainingDays.map((d) => {
               const isOpen = openDay === d.name
@@ -1180,7 +1173,7 @@ function Settings({
                               onClick={() => setSwapAt(swapAt === i ? null : i)}
                               className="shrink-0 rounded-lg border border-[var(--color-hair)] bg-[var(--color-surface)] px-3 py-1.5 text-[12px] font-semibold text-[var(--color-volt)]"
                             >
-                              {swapAt === i ? 'Close' : 'Change'}
+                              {swapAt === i ? useI18n().t('close') : useI18n().t('change')}
                             </button>
                           </div>
                           {swapAt === i && (
@@ -1211,11 +1204,11 @@ function Settings({
         </SettingsSection>
 
         {/* APPEARANCE */}
-        <SettingsSection title="Appearance">
+        <SettingsSection title={useI18n().t('appearance')}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-display text-base font-bold uppercase text-[var(--color-bone)]">Theme</p>
-              <p className="text-[12px] text-[var(--color-ash)]">{theme === 'dark' ? 'Somber (dark)' : 'Clear (light)'}</p>
+              <p className="font-display text-base font-bold uppercase text-[var(--color-bone)]">{useI18n().t('appearance')}</p>
+              <p className="text-[12px] text-[var(--color-ash)]">{theme === 'dark' ? useI18n().t('themeSomber') : useI18n().t('themeClear')}</p>
             </div>
             <div className="flex gap-1 rounded-full border border-[var(--color-hair)] bg-[var(--color-surface-2)] p-1">
               {(['dark', 'light'] as Theme[]).map((tm) => (
@@ -1235,7 +1228,7 @@ function Settings({
         </SettingsSection>
 
         {/* ACCOUNT */}
-        <SettingsSection title="Account">
+        <SettingsSection title={useI18n().t('account')}>
           <div className="flex items-center gap-3">
             <span className="flex size-11 items-center justify-center rounded-full bg-[var(--color-volt)] font-display text-lg font-extrabold text-[var(--color-onaccent)]">FN</span>
             <div className="min-w-0">
@@ -1250,7 +1243,7 @@ function Settings({
             <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2.2}>
               <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Log out
+            {useI18n().t('logout')}
           </button>
         </SettingsSection>
       </div>
@@ -1269,7 +1262,7 @@ function Settings({
                 : 'bg-[var(--color-surface)] text-[var(--color-ash)]')
           }
         >
-          {dirty ? 'Save changes' : saved ? 'Saved ✓' : 'Up to date'}
+          {dirty ? useI18n().t('saveChanges') : saved ? useI18n().t('saved') : useI18n().t('upToDate')}
         </button>
       </div>
     </div>
@@ -1481,13 +1474,13 @@ function WorkoutSession({ day, answers, onBack }: { day: SplitDay; answers: Answ
                     />
                     <span className="text-[12px] font-semibold text-[var(--color-ash)]">kg</span>
                   </div>
-                  <button
-                    onClick={() => logCharge(ex.name)}
-                    className="shrink-0 rounded-xl bg-[var(--color-volt)] px-4 py-2 font-display text-sm font-bold uppercase tracking-wide text-[var(--color-onaccent)] transition active:scale-95 disabled:opacity-35"
-                    disabled={!drafts[ex.name] || parseFloat(drafts[ex.name]) <= 0}
-                  >
-                    Save
-                  </button>
+                    <button
+                      onClick={() => logCharge(ex.name)}
+                      className="shrink-0 rounded-xl bg-[var(--color-volt)] px-4 py-2 font-display text-sm font-bold uppercase tracking-wide text-[var(--color-onaccent)] transition active:scale-95 disabled:opacity-35"
+                      disabled={!drafts[ex.name] || parseFloat(drafts[ex.name]) <= 0}
+                    >
+                      {useI18n().t('save')}
+                    </button>
                 </div>
               </div>
 
@@ -1497,7 +1490,7 @@ function WorkoutSession({ day, answers, onBack }: { day: SplitDay; answers: Answ
                   className="flex flex-1 items-center justify-center gap-2 py-2.5 text-[13px] font-semibold text-[var(--color-bone)] transition-colors hover:bg-[var(--color-surface-2)]"
                 >
                   <svg viewBox="0 0 24 24" className="size-4 text-[var(--color-volt)]" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-                  Watch tutorial
+                  {useI18n().t('watchTutorial')}
                 </button>
                 <button
                   onClick={() => toggleDone(i)}
@@ -1511,7 +1504,7 @@ function WorkoutSession({ day, answers, onBack }: { day: SplitDay; answers: Answ
                       <svg viewBox="0 0 24 24" className="size-2.5 text-[var(--color-onaccent)]" fill="none" stroke="currentColor" strokeWidth={4}><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     )}
                   </span>
-                  {done.has(i) ? 'Done' : 'Mark done'}
+                  {done.has(i) ? useI18n().t('done') : useI18n().t('markDone')}
                 </button>
               </div>
             </div>
@@ -1522,7 +1515,7 @@ function WorkoutSession({ day, answers, onBack }: { day: SplitDay; answers: Answ
           onClick={onBack}
           className="mt-5 w-full rounded-2xl bg-[var(--color-volt)] py-4 font-display text-lg font-bold uppercase tracking-wide text-[var(--color-onaccent)] shadow-[0_10px_30px_-8px_rgba(255,210,0,0.55)] transition active:scale-[0.98]"
         >
-          {done.size === exercises.length ? 'Finish Session ✓' : 'Finish Session'}
+          {done.size === exercises.length ? useI18n().t('finishSessionDone') : useI18n().t('finishSession')}
         </button>
       </div>
 
@@ -1602,6 +1595,7 @@ function Ring({ pct, label, value, sub }: { pct: number; label: string; value: s
 }
 
 function HomeTab({ answers, split, macros, rank, onRestart, onStart, onOpenSupps, onOpenSettings }: { answers: Answers; split: ReturnType<typeof buildSplit>; macros: ReturnType<typeof macroTargets>; rank: string; onRestart: () => void; onStart: (d: SplitDay) => void; onOpenSupps: () => void; onOpenSettings: () => void }) {
+  const { t } = useI18n()
   const today = split.find((d) => !d.done) ?? split[0]
   const doneCount = split.filter((d) => d.done).length
   const eaten = Math.round(macros.kcal * 0.46)
@@ -1609,9 +1603,9 @@ function HomeTab({ answers, split, macros, rank, onRestart, onStart, onOpenSupps
     <div className="px-6" style={{ animation: 'rise 0.4s ease-out both' }}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-ash)]">Good morning</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-ash)]">{useI18n().t('goodMorning')}</p>
           <h1 className="font-display text-3xl font-extrabold uppercase text-[var(--color-bone)]">Fadi</h1>
-          <p className="mt-1 text-[12px] text-[var(--color-ash)]">{GYM_NAME}</p>
+          <p className="mt-1 text-[12px] text-[var(--color-ash)]">{t('gymNamePlaceholder')}</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={onRestart} className="flex items-center gap-2 rounded-full border border-[var(--color-hair)] bg-[var(--color-surface)] py-2 pl-2 pr-3">
@@ -1632,7 +1626,7 @@ function HomeTab({ answers, split, macros, rank, onRestart, onStart, onOpenSupps
       </div>
 
       {/* Today's workout hero */}
-      <SectionTitle>Today&apos;s session</SectionTitle>
+      <SectionTitle>{t('todaysSession')}</SectionTitle>
       <div className="overflow-hidden rounded-2xl border border-[var(--color-volt)]/30 bg-gradient-to-br from-[var(--color-volt)]/15 to-[var(--color-surface)]">
         <div className="p-5">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-volt)]">
@@ -1644,8 +1638,8 @@ function HomeTab({ answers, split, macros, rank, onRestart, onStart, onOpenSupps
             <span><b className="text-[var(--color-bone)]">{answers.session || '60 min'}</b></span>
             <span><b className="text-[var(--color-bone)]">~{today.kcal}</b> kcal</span>
           </div>
-          <button onClick={() => onStart(today)} className="mt-4 w-full rounded-xl bg-[var(--color-volt)] py-3.5 font-display text-base font-bold uppercase tracking-wide text-[var(--color-onaccent)] transition active:scale-[0.98]">
-            Start Workout
+            <button onClick={() => onStart(today)} className="mt-4 w-full rounded-xl bg-[var(--color-volt)] py-3.5 font-display text-base font-bold uppercase tracking-wide text-[var(--color-onaccent)] transition active:scale-[0.98]">
+            {t('startWorkout')}
           </button>
         </div>
       </div>
@@ -1660,7 +1654,7 @@ function HomeTab({ answers, split, macros, rank, onRestart, onStart, onOpenSupps
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-display text-lg font-bold uppercase leading-none text-[var(--color-bone)]">Yari Supps</span>
-          <span className="mt-1 block text-[12px] text-[var(--color-ash)]">Fuel your gains — whey, creatine, gainers & more at the gym.</span>
+          <span className="mt-1 block text-[12px] text-[var(--color-ash)]">{t('suppsBlurb')}</span>
         </span>
         <svg viewBox="0 0 24 24" className="size-5 shrink-0 text-[var(--color-volt)] rtl:rotate-180" fill="none" stroke="currentColor" strokeWidth={2.4}>
           <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -1668,15 +1662,15 @@ function HomeTab({ answers, split, macros, rank, onRestart, onStart, onOpenSupps
       </button>
 
       {/* Rings */}
-      <SectionTitle>Today&apos;s targets</SectionTitle>
+      <SectionTitle>{t('todaysTargets')}</SectionTitle>
       <div className="flex justify-around rounded-2xl border border-[var(--color-hair)] bg-[var(--color-surface)] py-5">
-        <Ring pct={(eaten / macros.kcal) * 100} label="Calories" value={`${(eaten / 1000).toFixed(1)}k`} sub={`/${(macros.kcal / 1000).toFixed(1)}k`} />
-        <Ring pct={62} label="Protein" value="118" sub={`/${macros.protein}g`} />
-        <Ring pct={(doneCount / split.length) * 100} label="Workouts" value={`${doneCount}`} sub={`/${split.length}`} />
+        <Ring pct={(eaten / macros.kcal) * 100} label={t('calories')} value={`${(eaten / 1000).toFixed(1)}k`} sub={`/${(macros.kcal / 1000).toFixed(1)}k`} />
+        <Ring pct={62} label={t('protein')} value="118" sub={`/${macros.protein}g`} />
+        <Ring pct={(doneCount / split.length) * 100} label={t('workouts')} value={`${doneCount}`} sub={`/${split.length}`} />
       </div>
 
       {/* Streak / stats */}
-      <SectionTitle>This week</SectionTitle>
+      <SectionTitle>{t('thisWeek')}</SectionTitle>
       <div className="grid grid-cols-3 gap-3">
         {[['🔥', '12', 'Day streak'], ['🏋️', `${doneCount}`, 'Sessions'], ['📈', '+2.4kg', 'Lifted avg']].map(([i, v, l]) => (
           <div key={l} className="rounded-2xl border border-[var(--color-hair)] bg-[var(--color-surface)] p-4">
@@ -1691,9 +1685,10 @@ function HomeTab({ answers, split, macros, rank, onRestart, onStart, onOpenSupps
 }
 
 function TrainTab({ answers, split, onStart }: { answers: Answers; split: ReturnType<typeof buildSplit>; onStart: (d: SplitDay) => void }) {
+  const { t } = useI18n()
   return (
     <div className="px-6" style={{ animation: 'rise 0.4s ease-out both' }}>
-      <h1 className="font-display text-3xl font-extrabold uppercase text-[var(--color-bone)]">Your Split</h1>
+      <h1 className="font-display text-3xl font-extrabold uppercase text-[var(--color-bone)]">{t('yourSplit')}</h1>
       <p className="mt-1 text-[13px] text-[var(--color-ash)]">
         {answers.days}-day plan · {answers.goal || 'Custom goal'} · {answers.level || 'Tailored'}
       </p>
@@ -1730,6 +1725,7 @@ function TrainTab({ answers, split, onStart }: { answers: Answers; split: Return
 }
 
 function NutritionTab({ macros, answers }: { macros: ReturnType<typeof macroTargets>; answers: Answers }) {
+  const { t } = useI18n()
   const bars = [
     ['Protein', macros.protein, 118, 'g'],
     ['Carbs', macros.carbs, Math.round(macros.carbs * 0.4), 'g'],
@@ -1776,7 +1772,7 @@ function NutritionTab({ macros, answers }: { macros: ReturnType<typeof macroTarg
 
   return (
     <div className="px-6" style={{ animation: 'rise 0.4s ease-out both' }}>
-      <h1 className="font-display text-3xl font-extrabold uppercase text-[var(--color-bone)]">Nutrition</h1>
+      <h1 className="font-display text-3xl font-extrabold uppercase text-[var(--color-bone)]">{t('nutritionHeader')}</h1>
       <p className="mt-1 text-[13px] text-[var(--color-ash)]">
         Halal · Local &amp; budget-friendly
       </p>
@@ -1840,10 +1836,11 @@ function NutritionTab({ macros, answers }: { macros: ReturnType<typeof macroTarg
 const RANK_LADDER = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Emerald', 'Diamond', 'Master', 'GM']
 
 function RankTab({ rank }: { rank: string }) {
+  const { t } = useI18n()
   const idx = RANK_LADDER.indexOf(rank)
   return (
     <div className="px-6" style={{ animation: 'rise 0.4s ease-out both' }}>
-      <h1 className="font-display text-3xl font-extrabold uppercase text-[var(--color-bone)]">Your Rank</h1>
+      <h1 className="font-display text-3xl font-extrabold uppercase text-[var(--color-bone)]">{t('yourRank')}</h1>
       <div className="mt-5 flex flex-col items-center rounded-2xl border border-[var(--color-hair)] bg-gradient-to-b from-[var(--color-surface-2)] to-[var(--color-surface)] py-8">
         <div style={{ animation: 'volt-pulse 2.6s ease-in-out infinite' }}>
           <RankBadge rank={rank} size={110} />
@@ -1978,7 +1975,7 @@ function SuppsStore({ onBack }: { onBack: () => void }) {
           <img src={yariSuppsLogo} alt="Yari Supps" className="size-full object-cover" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--color-volt)]">In-gym store</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--color-volt)]">{useI18n().t('inGymStore')}</p>
           <h1 className="truncate font-display text-2xl font-extrabold uppercase text-[var(--color-bone)]">Yari Supps</h1>
         </div>
       </div>
@@ -2032,7 +2029,7 @@ function SuppsStore({ onBack }: { onBack: () => void }) {
                         onClick={() => add(s.name)}
                         className="rounded-lg bg-[var(--color-volt)] px-3 py-1.5 font-display text-[13px] font-bold uppercase text-[var(--color-onaccent)] transition active:scale-95"
                       >
-                        Add
+                        {useI18n().t('add')}
                       </button>
                     ) : (
                       <div className="flex items-center gap-2 rounded-lg border border-[var(--color-hair)] bg-[var(--color-ink)] px-1.5 py-1">
@@ -2048,7 +2045,7 @@ function SuppsStore({ onBack }: { onBack: () => void }) {
           })}
         </div>
 
-        <p className="mt-5 text-center text-[12px] text-[var(--color-ash)]">
+            <p className="mt-5 text-center text-[12px] text-[var(--color-ash)]">
           Reserve online · pay & pick up at {GYM_NAME} front desk.
         </p>
       </div>
@@ -2068,7 +2065,7 @@ function SuppsStore({ onBack }: { onBack: () => void }) {
             >
               <span className="flex items-center gap-2 font-display text-base font-bold uppercase tracking-wide">
                 <span className="flex size-6 items-center justify-center rounded-full bg-[var(--color-ink)] text-[12px] font-extrabold text-[var(--color-volt)]">{count}</span>
-                Reserve order
+                {useI18n().t('reserveOrderButton')}
               </span>
               <span className="font-display text-lg font-extrabold">{total} {CURRENCY}</span>
             </button>
@@ -2081,11 +2078,11 @@ function SuppsStore({ onBack }: { onBack: () => void }) {
 
 function TabBar({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
   const items: [Tab, string, string][] = [
-    ['home', 'Home', 'M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z'],
-    ['train', 'Train', 'M4 9h2v6H4zm14 0h2v6h-2zM7 11h10v2H7zM2 10h2v4H2zm18 0h2v4h-2z'],
-    ['progress', 'Log', 'M4 20V10m5 10V4m5 16v-7m5 7V8'],
-    ['nutrition', 'Fuel', 'M7 3v7a3 3 0 006 0V3m-3 11v7M17 3c-1.5 2-2 4-2 7s.5 5 2 7'],
-    ['rank', 'Rank', 'M12 2l3 6 6 .5-4.5 4 1.5 6L12 15l-6 3.5 1.5-6L3 8.5 9 8z'],
+    ['home', useI18n().t('tab_home'), 'M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z'],
+    ['train', useI18n().t('tab_train'), 'M4 9h2v6H4zm14 0h2v6h-2zM7 11h10v2H7zM2 10h2v4H2zm18 0h2v4h-2z'],
+    ['progress', useI18n().t('tab_progress'), 'M4 20V10m5 10V4m5 16v-7m5 7V8'],
+    ['nutrition', useI18n().t('tab_nutrition'), 'M7 3v7a3 3 0 006 0V3m-3 11v7M17 3c-1.5 2-2 4-2 7s.5 5 2 7'],
+    ['rank', useI18n().t('tab_rank'), 'M12 2l3 6 6 .5-4.5 4 1.5 6L12 15l-6 3.5 1.5-6L3 8.5 9 8z'],
   ]
   return (
     <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-around border-t border-[var(--color-hair)] bg-[var(--color-ink)]/95 px-4 pb-6 pt-3 backdrop-blur">
