@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Barlow Condensed', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --color-ink: #0d0d0d;
+  --color-surface: #1c1c1c;
+  --color-surface-2: #232323;
+  --color-hair: #2e2e2e;
+  --color-bone: #f5f5f5;
+  --color-ash: #8a8a8a;
+  --color-volt: #ffd200;
+  --color-volt-dim: #b8990a;
+  /* text that sits on the volt accent — stays dark in every theme */
+  --color-onaccent: #0d0d0d;
+  --page-bg: #000;
+}
+
+/* Light ("clear") theme overrides */
+html.theme-light {
+  --color-ink: #eceef2;
+  --color-surface: #ffffff;
+  --color-surface-2: #f3f4f7;
+  --color-hair: #dfe1e6;
+  --color-bone: #14161a;
+  --color-ash: #6a6d73;
+  --color-volt: #f5c400;
+  --color-volt-dim: #b8990a;
+  --page-bg: #dcdee4;
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--page-bg);
+  font-family: var(--font-body);
+  color: var(--color-bone);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* hide scrollbars until scrolling */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes volt-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes volt-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "description": "An AI-powered gym coaching app that creates personalized workout and nutrition plans for users of all fitness levels, enhancing their training experience.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
